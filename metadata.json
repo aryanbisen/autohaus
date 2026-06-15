@@ -1,0 +1,6 @@
+{
+  "name": "Autohaus Portal",
+  "description": "Ein Online-Marktplatz für Autos mit Benutzerverwaltung, Inserat-Management, Fahrzeugsuche und einem internen Chat-System.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
