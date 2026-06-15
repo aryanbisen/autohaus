@@ -14,7 +14,9 @@ Willkommen bei **SecureDrive**, einer kompromisslos sicheren Plattform für den 
    - Frontend und Backend sollte laufen.
 
  22.06.2026
- - 
+ - An den definierten Sicherheitskonzepten Arbeiten.
 
  29.06.2026
+ - Funktionale Anforderungen überprüfen
+ - Sicherheitsprinzipien testen.
  
