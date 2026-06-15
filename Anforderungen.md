@@ -39,6 +39,11 @@ Sicherstellung der Datenintegrität und Geheimhaltung auf dem Übertragungsweg u
 *   **Verschlüsselung sensibler Daten:** Symmetrische Verschlüsselung (AES-256) für besonders kritische Datenfelder in der Datenbank.
 *   **Sichere Zufallszahlen:** Verwendung von kryptographisch sicheren Zufallszahlengeneratoren (CSPRNG) für Tokens und IDs.
 
+### 5. Broken Access Control / Fehlerhafte Zugriffskontrolle (OWASP A01:2021)
+* **Verhinderung von IDOR (Insecure Direct Object References):** Ein Angreifer darf nicht in der Lage sein, Inserate oder Verträge anderer Nutzer zu manipulieren, indem er einfach die ID in der URL oder im API-Request ändert (z. B. `/api/cars/60d5ec...`). Jede Anfrage wird serverseitig strikt daraufhin geprüft, ob die Session-ID des angemeldeten Nutzers mit dem `owner`-Feld des MongoDB-Dokuments übereinstimmt.
+* **Prinzip der minimalen Rechte (Principle of Least Privilege):** Rollenbasierte Zugriffskontrolle (RBAC). Anonyme Nutzer können nur suchen; registrierte Käufer können chatten; Verkäufer Inserate verwalten; Administratoren haben exklusiven Zugriff auf das Backend-Dashboard.
+* **Schutz von Client-seitigen Routen:** Berechtigungen werden nicht nur im Frontend (React/Next.js) optisch versteckt, sondern bei *jedem* API-Endpunkt im Node.js-Backend hart erzwungen.
+
 ---
 
 ## ✨ Features
