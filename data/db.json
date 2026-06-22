@@ -1,0 +1,204 @@
+{
+  "users": [
+    {
+      "id": "user-qij84a011",
+      "email": "aryan@gmail.com",
+      "name": "Aryan Bisen",
+      "phone": "1111",
+      "avatarUrl": "https://api.dicebear.com/7.x/adventurer/svg?seed=Aryan%20Bisen",
+      "isAdmin": false,
+      "registeredAt": "2026-06-22T14:20:27.459Z"
+    },
+    {
+      "id": "user-admin",
+      "email": "admin@autohaus.de",
+      "name": "Admin Administrator",
+      "phone": "+49 170 11122233",
+      "avatarUrl": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150",
+      "isAdmin": true,
+      "registeredAt": "2026-06-10T10:00:00Z"
+    },
+    {
+      "id": "user-seller1",
+      "email": "max.mustermann@autohaus.de",
+      "name": "Max Mustermann",
+      "phone": "+49 171 9876543",
+      "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=150",
+      "isAdmin": false,
+      "registeredAt": "2026-06-11T12:00:00Z"
+    },
+    {
+      "id": "user-seller2",
+      "email": "kaeufer@autohaus.de",
+      "name": "Anna Schmidt",
+      "phone": "+49 172 4455667",
+      "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150",
+      "isAdmin": false,
+      "registeredAt": "2026-06-12T14:30:00Z"
+    }
+  ],
+  "listings": [
+    {
+      "id": "listing-wu75v384x",
+      "sellerId": "user-qij84a011",
+      "sellerName": "Aryan Bisen",
+      "sellerPhone": "1111",
+      "sellerLocation": "Zürich",
+      "brand": "Porsche",
+      "model": "911 Turbo S",
+      "mileage": 50000,
+      "year": 2015,
+      "fuelType": "Benzin",
+      "transmission": "Automatik",
+      "price": 20000,
+      "description": "Top Zustand.",
+      "images": [
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800"
+      ],
+      "isApproved": false,
+      "status": "active",
+      "createdAt": "2026-06-22T14:24:44.247Z"
+    },
+    {
+      "id": "listing-1",
+      "sellerId": "user-seller1",
+      "sellerName": "Max Mustermann",
+      "sellerPhone": "+49 171 9876543",
+      "sellerLocation": "München",
+      "brand": "Porsche",
+      "model": "911 Carrera S",
+      "mileage": 42000,
+      "year": 2021,
+      "fuelType": "Benzin",
+      "transmission": "Automatik",
+      "price": 119500,
+      "description": "Wunderschöner Porsche 911 Carrera S in Tiefschwarz-Metallic. Scheckheftgepflegt beim Porsche Zentrum. Unfallfrei, Nichtraucherfahrzeug, Vollleder-Ausstattung, Sportabgasanlage, Schiebedach, Bose Soundsystem.",
+      "images": [
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1200",
+        "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=1200",
+        "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=1200"
+      ],
+      "isApproved": true,
+      "status": "active",
+      "createdAt": "2026-06-12T08:00:00Z"
+    },
+    {
+      "id": "listing-2",
+      "sellerId": "user-seller1",
+      "sellerName": "Max Mustermann",
+      "sellerPhone": "+49 171 9876543",
+      "sellerLocation": "München",
+      "brand": "VW",
+      "model": "Golf VII GTI",
+      "mileage": 78000,
+      "year": 2018,
+      "fuelType": "Benzin",
+      "transmission": "Manuell",
+      "price": 24900,
+      "description": "Top gepflegter Golf GTI V7 Performance. 8-fach bereift auf schicken Alufelgen. Services lückenlos durchgeführt. Virtual Cockpit, LED Scheinwerfer, Einparkhilfe, Sitzheizung, Abstandstempomat.",
+      "images": [
+        "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=1200",
+        "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=1200"
+      ],
+      "isApproved": true,
+      "status": "active",
+      "createdAt": "2026-06-13T09:15:00Z"
+    },
+    {
+      "id": "listing-3",
+      "sellerId": "user-seller2",
+      "sellerName": "Anna Schmidt",
+      "sellerPhone": "+49 172 4455667",
+      "sellerLocation": "Hamburg",
+      "brand": "Tesla",
+      "model": "Model 3 Long Range",
+      "mileage": 29000,
+      "year": 2022,
+      "fuelType": "Elektro",
+      "transmission": "Automatik",
+      "price": 41500,
+      "description": "Tesla Model 3 Dual Motor Allradantrieb Long Range mit vollem Potenzial für autonomes Fahren (FSD aktiviert, Wert 7.500€). Exzellenter Akkuzustand, nur zuhause materialschonend geladen. Garagenwagen, unfallfrei.",
+      "images": [
+        "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=1200",
+        "https://images.unsplash.com/photo-1571127246842-065cc8e1ad5f?auto=format&fit=crop&q=80&w=1200"
+      ],
+      "isApproved": true,
+      "status": "active",
+      "createdAt": "2026-06-14T11:00:00Z"
+    },
+    {
+      "id": "listing-4",
+      "sellerId": "user-seller2",
+      "sellerName": "Anna Schmidt",
+      "sellerPhone": "+49 172 4455667",
+      "sellerLocation": "Hamburg",
+      "brand": "BMW",
+      "model": "320d Touring M-Sport",
+      "mileage": 95000,
+      "year": 2019,
+      "fuelType": "Diesel",
+      "transmission": "Automatik",
+      "price": 29800,
+      "description": "Perfektes Langstreckenfahrzeug. M-Sportpaket ab Werk. Adaptives LED Licht, Harman Kardon HiFi System, Head-Up Display, Keyless Entry, Elektrische Heckklappe, Rückfahrkamera, neue Bremsen.",
+      "images": [
+        "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=1200"
+      ],
+      "isApproved": true,
+      "status": "active",
+      "createdAt": "2026-06-14T16:45:00Z"
+    },
+    {
+      "id": "listing-pending",
+      "sellerId": "user-seller1",
+      "sellerName": "Max Mustermann",
+      "sellerPhone": "+49 171 9876543",
+      "sellerLocation": "München",
+      "brand": "Mercedes",
+      "model": "C63 AMG",
+      "mileage": 54000,
+      "year": 2020,
+      "fuelType": "Benzin",
+      "transmission": "Automatik",
+      "price": 72900,
+      "description": "Brutaler Sound und mega Optik. Dieses Inserat wartet auf die Freigabe durch das Moderationsteam, um optimal demonstriert zu werden.",
+      "images": [
+        "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=1200"
+      ],
+      "isApproved": false,
+      "status": "active",
+      "createdAt": "2026-06-15T06:00:00Z"
+    }
+  ],
+  "chats": [
+    {
+      "id": "chat-1",
+      "listingId": "listing-1",
+      "listingBrand": "Porsche",
+      "listingModel": "911 Carrera S",
+      "listingPrice": 119500,
+      "listingImage": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1200",
+      "buyerId": "user-seller2",
+      "buyerName": "Anna Schmidt",
+      "sellerId": "user-seller1",
+      "sellerName": "Max Mustermann",
+      "lastMessageText": "Hallo Max, ist der Preis noch leicht verhandelbar?",
+      "lastMessageTime": "2026-06-15T07:00:00Z",
+      "unreadCount": {
+        "user-seller1": 0,
+        "user-seller2": 0
+      }
+    }
+  ],
+  "messages": [
+    {
+      "id": "msg-12345",
+      "chatId": "chat-1",
+      "senderId": "user-seller2",
+      "receiverId": "user-seller1",
+      "content": "Hallo Max, ist der Preis noch leicht verhandelbar?",
+      "createdAt": "2026-06-15T07:00:00Z",
+      "isRead": true
+    }
+  ],
+  "favorites": {}
+}

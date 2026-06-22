@@ -29,7 +29,7 @@ const defaultUsers: User[] = [
   },
   {
     id: "user-seller2",
-    email: "anna.schmidt@autohaus.de",
+    email: "kaeufer@autohaus.de",
     name: "Anna Schmidt",
     phone: "+49 172 4455667",
     avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150",
@@ -204,6 +204,69 @@ function initDb() {
       }
     };
     fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf-8");
+  } else {
+    try {
+      const content = fs.readFileSync(DB_FILE, "utf-8");
+      const db: Database = JSON.parse(content);
+      let updated = false;
+
+      if (!db.users) {
+        db.users = [];
+        updated = true;
+      }
+      for (const defUser of defaultUsers) {
+        if (!db.users.some(u => u.email.toLowerCase() === defUser.email.toLowerCase())) {
+          db.users.push(defUser);
+          updated = true;
+        }
+      }
+
+      if (!db.listings) {
+        db.listings = [];
+        updated = true;
+      }
+      for (const defListing of defaultListings) {
+        if (!db.listings.some(l => l.id === defListing.id)) {
+          db.listings.push(defListing);
+          updated = true;
+        }
+      }
+
+      if (!db.chats) {
+        db.chats = [];
+        updated = true;
+      }
+      for (const defChat of defaultChats) {
+        if (!db.chats.some(c => c.id === defChat.id)) {
+          db.chats.push(defChat);
+          updated = true;
+        }
+      }
+
+      if (!db.messages) {
+        db.messages = [];
+        updated = true;
+      }
+      for (const defMsg of defaultMessages) {
+        if (!db.messages.some(m => m.id === defMsg.id)) {
+          db.messages.push(defMsg);
+          updated = true;
+        }
+      }
+
+      if (!db.favorites) {
+        db.favorites = {
+          "user-seller2": ["listing-1", "listing-2"]
+        };
+        updated = true;
+      }
+
+      if (updated) {
+        fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf-8");
+      }
+    } catch (error) {
+      console.error("Error patching existing database", error);
+    }
   }
 }
 
