@@ -141,9 +141,56 @@ if (req.user.id !== userId) {
 ---
 
 
-### Verfügbarkeitsschutz 
+## 3. Availability (Verfügbarkeit)
 
-- Implementierung eines IP-basierten, in-memory Rate Limiters zur DoS-Prävention.
-- Begrenzung von Login/Registrierungsversuchen auf max. 15 Anfragen pro Minute je IP-Adresse zur Verhinderung von Brute-Force-Angriffen.
-- Begrenzung aller anderen API-Schnittstellen auf max. 200 Anfragen pro Minute je IP-Adresse.
+### Was wurde implementiert?
+
+**IP-basiertes Rate Limiting** – Schutz gegen DoS-Angriffe und Brute-Force-Login-Versuche.
+
+#### a) Rate Limiter Implementierung
+Ein In-Memory Rate Limiter in [server.ts](file:///c:/Users/Aryan/Downloads/autohaus/server.ts#L311-L343) verfolgt Anfragen pro IP-Adresse innerhalb eines Zeitfensters:
+
+```typescript
+// server.ts – Rate Limiter 
+function rateLimiter(windowMs, maxRequests, message) {
+  return (req, res, next) => {
+    const ip = req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const now = Date.now();
+
+    let record = rateLimits.get(ip);
+    if (!record || now > record.resetTime) {
+      record = { count: 0, resetTime: now + windowMs };
+    }
+    record.count++;
+    rateLimits.set(ip, record);
+
+    if (record.count > maxRequests) {
+      res.setHeader("Retry-After", Math.ceil((record.resetTime - now) / 1000));
+      return res.status(429).json({ error: message });
+    }
+    next();
+  };
+}
+```
+
+#### b) Anwendung der Rate Limiter
+Drei Stufen von Rate Limiting:
+
+```typescript
+// server.ts – startServer
+// 1. Allgemeines API-Limit: 300 Anfragen/Minute pro IP
+app.use("/api", rateLimiter(60000, 300));
+
+// 2. Strenges Login-Limit: 15 Versuche/Minute (Brute-Force-Schutz)
+app.use("/api/auth/login", rateLimiter(60000, 15, "Zu viele Loginversuche..."));
+
+// 3. Strenges Registrierungslimit: 10 Versuche/Minute
+app.use("/api/auth/register", rateLimiter(60000, 10, "Zu viele Registrierungsversuche..."));
+```
+
+**Warum nützlich?**
+- Das **allgemeine API-Limit** (300/min) schützt gegen automatisierte Bots und einfache DoS-Angriffe, die den Server durch massenhafte Anfragen überlasten könnten.
+- Das **Login-Limit** (15/min) verhindert **Brute-Force-Angriffe**, bei denen ein Angreifer automatisiert tausende E-Mail-Adressen durchprobiert.
+- Das **Registrierungslimit** (10/min) verhindert die massenhafte Erstellung von Spam-Konten.
+- Der `Retry-After`-Header informiert den Client gemäß RFC-Standard, wann er es erneut versuchen darf.
 
