@@ -8,9 +8,11 @@ Dieses Dokument beschreibt die implementierten Sicherheitsmaßnahmen gemäß der
 
 ## CIA-Flow-Diagram
 
-![CIA-Ablauf](CIA.svg)
+![CIA-Ablauf](Implementation.svg)
 
 ---
+
+## 1. Confidentiality (Vertraulichkeit)
 
 ### Was wurde implementiert?
 
@@ -291,6 +293,62 @@ function verifyPassword(password: string, storedValue: string): boolean {
 - **Salted Hashing** bedeutet: Selbst wenn zwei Benutzer dasselbe Passwort wählen, sind ihre gespeicherten Hashes unterschiedlich (wegen des zufälligen Salts).
 - **Scrypt** ist ein **speicherintensiver** (memory-hard) Algorithmus. Das macht Brute-Force-Angriffe mit GPUs oder ASICs extrem teuer, da jeder Hash-Versuch viel RAM benötigt.
 - Wenn die Datenbank kompromittiert wird, kann ein Angreifer die Passwörter **nicht direkt lesen** – er müsste jeden Hash einzeln knacken.
+
+---
+
+### 6. Verschlüsselung sensibler Daten – AES-256-CBC
+
+#### Was wurde implementiert?
+Sensible Datenfelder werden mit **AES-256-CBC** symmetrischer Verschlüsselung vor dem Speichern in die Datenbank verschlüsselt und beim Lesen transparent entschlüsselt.
+
+#### Wo im Code? ([server.ts](file:///c:/Users/Aryan/Downloads/autohaus/server.ts#L391-L419))
+
+```typescript
+const ENCRYPTION_KEY = crypto.scryptSync("autohaus-secure-key-12345", "autohaus-salt", 32);
+
+function encrypt(text: string): string {
+  const iv = crypto.randomBytes(16); // Zufälliger Initialisierungsvektor
+  const cipher = crypto.createCipheriv("aes-256-cbc", ENCRYPTION_KEY, iv);
+  let encrypted = cipher.update(text, "utf8", "hex");
+  encrypted += cipher.final("hex");
+  return iv.toString("hex") + ":" + encrypted;
+}
+
+function decrypt(text: string): string {
+  const textParts = text.split(":");
+  const iv = Buffer.from(textParts.shift()!, "hex");
+  const decipher = crypto.createDecipheriv("aes-256-cbc", ENCRYPTION_KEY, iv);
+  let decrypted = decipher.update(textParts.join(":"), "hex", "utf8");
+  decrypted += decipher.final("utf8");
+  return decrypted;
+}
+```
+
+#### Verschlüsselte Felder:
+| Feld | Ort |
+|---|---|
+| `phone` | Benutzer-Telefonnummer |
+| `sellerPhone` | Verkäufer-Telefonnummer in Inseraten |
+| `content` | Nachrichteninhalt in Chats |
+
+#### Transparente Ver-/Entschlüsselung:
+```typescript
+// writeDb() – Verschlüsselt sensible Felder vor dem Schreiben auf Disk
+encryptedDb.users = encryptedDb.users.map(u => ({
+  ...u,
+  phone: u.phone ? encrypt(u.phone) : u.phone
+}));
+
+// readDb() – Entschlüsselt sensible Felder beim Laden in den Speicher
+db.users = db.users.map(u => ({
+  ...u,
+  phone: u.phone ? decrypt(u.phone) : u.phone
+}));
+```
+
+#### Warum nützlich?
+- Selbst wenn ein Angreifer direkten Zugriff auf die Datenbankdatei (`data/db.json`) erhält, sind Telefonnummern und private Nachrichten **unlesbar** – sie erscheinen als kryptischer Hex-String.
+- **Zufälliger IV** (Initialisierungsvektor): Jede Verschlüsselung desselben Textes erzeugt ein anderes Ergebnis. Das verhindert **Known-Plaintext-Angriffe**.
 
 ---
 
