@@ -1,8 +1,14 @@
 # 1 Schutzziele (CIA)
 
-![CIA-Ablauf](https://github.com/aryanbisen/autohaus/CIA.svg)
+---
 
 Dieses Dokument beschreibt die implementierten Sicherheitsmaßnahmen gemäß der CIA-Triade (Confidentiality, Integrity, Availability) in der Autohaus-Plattform.
+
+---
+
+## CIA-Flow-Diagram
+
+![CIA-Ablauf](CIA.svg)
 
 ---
 
