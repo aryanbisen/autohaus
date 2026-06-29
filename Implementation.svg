@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 670.0246666666667 1804.9920000000002" width="670.0246666666667" height="1804.9920000000002" style="--bg:#1F1F1F;--fg:#CCCCCC;--line:#CCCCCC;--accent:#0078D4;--muted:#CCCCCCCC;--surface:#181818;--border:#CCCCCC;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="http://localhost:3000" points="424.31700000000006,76.9 424.31700000000006,112.9 354.6211666666667,112.9 354.6211666666667,193.2" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="301 → https://localhost:3443" points="354.6211666666667,230.10000000000002 354.6211666666667,334.40000000000003 411.9670000000001,334.40000000000003 411.9670000000001,346.40000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="A" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="https://localhost:3443" points="455.59033333333343,76.9 455.59033333333343,266.1 525.2861666666668,266.1 525.2861666666668,334.40000000000003 467.94033333333334,334.40000000000003 467.94033333333334,346.40000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Security Headers" points="439.9536666666668,383.3 439.95366666666666,499.6000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="439.95366666666666,536.5 439.95366666666666,584.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="&lt; Limit" points="421.4765000000001,621.4 421.4765000000001,633.4 341.99366666666674,633.4 341.99366666666674,713.6999999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="X" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="&gt; Limit" points="458.43083333333334,621.4 458.43083333333334,747.665 537.9136666666667,747.665 537.9136666666667,827.9649999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Token gültig" points="316.72400000000005,750.5999999999999 316.72400000000005,786.5999999999999 254.70616666666672,786.5999999999999 254.70616666666672,866.8999999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="Y" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Token ungültig" points="367.26333333333343,750.5999999999999 367.26333333333343,900.8649999999999 429.28116666666676,900.8649999999999 429.28116666666676,981.1649999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="H" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Admin-Route" points="229.51200000000006,992.8708333333332 229.51200000000006,1054.0649999999998 141.6995,1054.0649999999998 141.69950000000003,1134.3649999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="I" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="isAdmin: true" points="121.36983333333336,1171.2649999999999 121.36983333333336,1207.2649999999999 99.87750000000003,1207.2649999999999 99.8775,1287.5649999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="Z" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="isAdmin: false" points="162.0291666666667,1171.2649999999999 162.0291666666667,1207.2649999999999 207.0794166666667,1207.2649999999999 207.0794166666667,1631.192 231.99225000000004,1631.192 231.99225000000004,1643.192" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="J" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="User-Route" points="279.9003333333334,992.8708333333332 279.9003333333334,1054.0649999999998 367.7608333333334,1054.0649999999998 367.7608333333334,1134.3649999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="J" data-to="K" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Eigentümer" points="390.7320000000001,1249.220833333333 390.7320000000001,1308.1919999999998 411.8368333333334,1308.1919999999998 411.8368333333334,1388.4919999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="J" data-to="Z" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Nicht Eigentümer" points="344.78966666666673,1249.220833333333 344.78966666666673,1308.1919999999998 299.7874166666667,1308.1919999999998 299.7874166666667,1631.192 274.87458333333336,1631.192 274.87458333333336,1643.192" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="K" data-to="L" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="411.8368333333334,1425.3919999999998 411.8368333333334,1473.3919999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="L" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="411.8368333333334,1510.292 411.8368333333334,1558.292" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="M" data-to="N" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="411.8368333333334,1595.192 411.8368333333334,1643.192" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="N" data-to="O" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="411.8368333333334,1680.092 411.8368333333334,1728.092" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="A" data-to="B" data-label="http://localhost:3000">
+  <rect x="298.6211666666667" y="119.9" width="111.50200000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="354.3721666666667" y="135.05" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">http://localhost:3000</text>
+</g>
+<g class="edge-label" data-from="B" data-to="C" data-label="301 → https://localhost:3443">
+  <rect x="283.6211666666667" y="273.1" width="141.202" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="354.2221666666667" y="288.25" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">301 → https://localhost:3443</text>
+</g>
+<g class="edge-label" data-from="A" data-to="C" data-label="https://localhost:3443">
+  <rect x="466.28616666666676" y="273.1" width="117.44200000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="525.0071666666668" y="288.25" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">https://localhost:3443</text>
+</g>
+<g class="edge-label" data-from="C" data-to="D" data-label="Security Headers">
+  <rect x="388.9536666666667" y="426.30000000000007" width="101.40400000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="439.6556666666667" y="441.45000000000005" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Security Headers</text>
+</g>
+<g class="edge-label" data-from="E" data-to="F" data-label="&lt; Limit">
+  <rect x="318.49366666666674" y="640.4" width="46.756" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="341.8716666666667" y="655.55" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">&lt; Limit</text>
+</g>
+<g class="edge-label" data-from="E" data-to="X" data-label="&gt; Limit">
+  <rect x="514.4136666666667" y="754.665" width="46.756" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="537.7916666666667" y="769.8149999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">&gt; Limit</text>
+</g>
+<g class="edge-label" data-from="F" data-to="G" data-label="Token gültig">
+  <rect x="216.70616666666672" y="793.5999999999999" width="75.26800000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="254.34016666666673" y="808.7499999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Token gültig</text>
+</g>
+<g class="edge-label" data-from="F" data-to="Y" data-label="Token ungültig">
+  <rect x="385.28116666666676" y="907.8649999999999" width="87.14800000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="428.8551666666668" y="923.0149999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Token ungültig</text>
+</g>
+<g class="edge-label" data-from="G" data-to="H" data-label="Admin-Route">
+  <rect x="103.1995" y="1061.0649999999998" width="76.456" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="141.4275" y="1076.215" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Admin-Route</text>
+</g>
+<g class="edge-label" data-from="H" data-to="I" data-label="isAdmin: true">
+  <rect x="60.877500000000026" y="1214.2649999999999" width="77.644" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="99.69950000000003" y="1229.415" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">isAdmin: true</text>
+</g>
+<g class="edge-label" data-from="H" data-to="Z" data-label="isAdmin: false">
+  <rect x="166.0794166666667" y="1214.2649999999999" width="81.20800000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="206.68341666666672" y="1229.415" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">isAdmin: false</text>
+</g>
+<g class="edge-label" data-from="G" data-to="J" data-label="User-Route">
+  <rect x="331.7608333333334" y="1061.0649999999998" width="71.70400000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="367.61283333333336" y="1076.215" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">User-Route</text>
+</g>
+<g class="edge-label" data-from="J" data-to="K" data-label="Eigentümer">
+  <rect x="375.8368333333334" y="1315.1919999999998" width="71.11" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="411.3918333333334" y="1330.3419999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Eigentümer</text>
+</g>
+<g class="edge-label" data-from="J" data-to="Z" data-label="Nicht Eigentümer">
+  <rect x="251.28741666666667" y="1315.1919999999998" width="96.65200000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="299.6134166666667" y="1330.3419999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Nicht Eigentümer</text>
+</g>
+<g class="node" data-id="A" data-label="Browser" data-shape="rectangle">
+  <rect x="393.0436666666667" y="40" width="93.82" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="439.95366666666666" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Browser</text>
+</g>
+<g class="node" data-id="B" data-label="HTTP Redirect Server" data-shape="rectangle">
+  <rect x="266.9561666666667" y="193.2" width="175.33" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="354.62116666666674" y="211.64999999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">HTTP Redirect Server</text>
+</g>
+<g class="node" data-id="C" data-label="HTTPS Server (TLS)" data-shape="rectangle">
+  <rect x="355.99366666666674" y="346.40000000000003" width="167.92" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="439.9536666666667" y="364.85" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">HTTPS Server (TLS)</text>
+</g>
+<g class="node" data-id="D" data-label="Helmet (HSTS, CSP, X-Frame)" data-shape="rectangle">
+  <rect x="333.02266666666674" y="499.6000000000001" width="213.86199999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="439.9536666666667" y="518.0500000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Helmet (HSTS, CSP, X-Frame)</text>
+</g>
+<g class="node" data-id="E" data-label="Rate Limiter" data-shape="rectangle">
+  <rect x="384.52216666666675" y="584.5" width="110.863" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="439.9536666666668" y="602.95" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Rate Limiter</text>
+</g>
+<g class="node" data-id="F" data-label="authenticateToken" data-shape="rectangle">
+  <rect x="266.18466666666677" y="713.6999999999999" width="151.618" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="341.99366666666674" y="732.15" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">authenticateToken</text>
+</g>
+<g class="node" data-id="X" data-label="429 Too Many Requests" data-shape="rectangle">
+  <rect x="445.8026666666667" y="827.9649999999999" width="184.22199999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="537.9136666666667" y="846.415" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">429 Too Many Requests</text>
+</g>
+<g class="node" data-id="G" data-label="Route-Handler" data-shape="diamond">
+  <polygon points="254.70616666666672,866.8999999999999 330.2886666666667,942.4824999999998 254.70616666666672,1018.0649999999998 179.1236666666667,942.4824999999998" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="254.70616666666672" y="942.4824999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Route-Handler</text>
+</g>
+<g class="node" data-id="Y" data-label="401 Unauthorized" data-shape="rectangle">
+  <rect x="358.2886666666667" y="981.1649999999998" width="141.985" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="429.2811666666667" y="999.6149999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">401 Unauthorized</text>
+</g>
+<g class="node" data-id="H" data-label="requireAdmin" data-shape="rectangle">
+  <rect x="80.71050000000004" y="1134.3649999999998" width="121.97799999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="141.69950000000003" y="1152.8149999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">requireAdmin</text>
+</g>
+<g class="node" data-id="I" data-label="Admin-Zugriff" data-shape="rectangle">
+  <rect x="40" y="1287.5649999999998" width="119.75500000000001" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="99.8775" y="1306.0149999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Admin-Zugriff</text>
+</g>
+<g class="node" data-id="Z" data-label="403 Forbidden" data-shape="rectangle">
+  <rect x="189.10991666666672" y="1643.192" width="128.647" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="253.43341666666672" y="1661.642" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">403 Forbidden</text>
+</g>
+<g class="node" data-id="J" data-label="IDOR-Check" data-shape="diamond">
+  <polygon points="367.7608333333334,1134.3649999999998 436.6743333333334,1203.2785 367.7608333333334,1272.192 298.8473333333334,1203.2785" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="367.7608333333334" y="1203.2785" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">IDOR-Check</text>
+</g>
+<g class="node" data-id="K" data-label="Zugriff gewährt" data-shape="rectangle">
+  <rect x="346.7723333333334" y="1388.4919999999997" width="130.12900000000002" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="411.8368333333334" y="1406.9419999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Zugriff gewährt</text>
+</g>
+<g class="node" data-id="L" data-label="readDb() → decrypt()" data-shape="rectangle">
+  <rect x="332.3228333333334" y="1473.3919999999998" width="159.02800000000002" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="411.8368333333334" y="1491.8419999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">readDb() → decrypt()</text>
+</g>
+<g class="node" data-id="M" data-label="Business Logic" data-shape="rectangle">
+  <rect x="344.5493333333334" y="1558.292" width="134.575" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="411.8368333333334" y="1576.742" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Business Logic</text>
+</g>
+<g class="node" data-id="N" data-label="writeDb() → encrypt()" data-shape="rectangle">
+  <rect x="332.3228333333334" y="1643.192" width="159.02800000000002" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="411.8368333333334" y="1661.642" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">writeDb() → encrypt()</text>
+</g>
+<g class="node" data-id="O" data-label="db.json (AES-256 verschlüsselt)" data-shape="rectangle">
+  <rect x="296.3843333333334" y="1728.092" width="230.90499999999994" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="411.8368333333334" y="1746.5420000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">db.json (AES-256 verschlüsselt)</text>
+</g>
+</svg>
