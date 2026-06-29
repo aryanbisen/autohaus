@@ -4,7 +4,7 @@ import { User } from "../types";
 
 interface NavbarProps {
   currentUser: User | null;
-  onLogin: (email: string) => Promise<boolean>;
+  onLogin: (email: string, password?: string) => Promise<boolean>;
   onLogout: () => void;
   onNavigate: (view: string) => void;
   activeView: string;
@@ -24,29 +24,31 @@ export default function Navbar({
   const [showDemoUserSelector, setShowDemoUserSelector] = useState(false);
   const [showManualLogin, setShowManualLogin] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
   const demoAccounts = [
-    { email: "kaeufer@autohaus.de", name: "Käufer (Anna S.)", role: "Interessent", icon: "🚗" },
-    { email: "max.mustermann@autohaus.de", name: "Max Mustermann", role: "Verkäufer (Standard)", icon: "💼" },
-    { email: "admin@autohaus.de", name: "Administrator", role: "Admin Moderation & Stats", icon: "🛡️" }
+    { email: "kaeufer@autohaus.de", password: "kaeufer123", name: "Käufer (Anna S.)", role: "Interessent", icon: "🚗" },
+    { email: "max.mustermann@autohaus.de", password: "max123", name: "Max Mustermann", role: "Verkäufer (Standard)", icon: "💼" },
+    { email: "admin@autohaus.de", password: "admin123", name: "Administrator", role: "Admin Moderation & Stats", icon: "🛡️" }
   ];
 
   const handleManualLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!loginEmail) return;
+    if (!loginEmail || !loginPassword) return;
     setErrorMsg("");
-    const success = await onLogin(loginEmail);
+    const success = await onLogin(loginEmail, loginPassword);
     if (success) {
       setShowManualLogin(false);
+      setLoginPassword("");
     } else {
-      setErrorMsg("E-Mail nicht registriert. Bitte nutzen Sie einen der Demo-Logins oder registrieren Sie sich.");
+      setErrorMsg("E-Mail-Adresse oder Passwort falsch.");
     }
   };
 
-  const handleDemoSelect = async (email: string) => {
+  const handleDemoSelect = async (email: string, password?: string) => {
     setErrorMsg("");
-    await onLogin(email);
+    await onLogin(email, password);
     setShowDemoUserSelector(false);
   };
 
@@ -62,7 +64,7 @@ export default function Navbar({
           {demoAccounts.map((demo) => (
             <button
               key={demo.email}
-              onClick={() => onLogin(demo.email)}
+              onClick={() => onLogin(demo.email, demo.password)}
               className={`hover:text-blue-400 transition-colors font-semibold px-2 py-0.5 text-[10px] uppercase tracking-wider rounded-sm cursor-pointer ${
                 currentUser?.email === demo.email ? "bg-blue-600 text-white" : "text-slate-300"
               }`}
@@ -271,13 +273,27 @@ export default function Navbar({
             <form onSubmit={handleManualLoginSubmit} className="space-y-4">
               <div>
                 <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
-                  Geben Sie Ihre registrierte E-Mail-Adresse ein:
+                  E-Mail-Adresse:
                 </label>
                 <input
                   type="email"
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   placeholder="name@beispiel.de"
+                  className="w-full px-3 py-2 border border-slate-200 rounded text-xs focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all outline-none"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                  Passwort:
+                </label>
+                <input
+                  type="password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="Ihr Passwort"
                   className="w-full px-3 py-2 border border-slate-200 rounded text-xs focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all outline-none"
                   required
                 />

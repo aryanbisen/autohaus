@@ -23,6 +23,7 @@ export default function App() {
   const [regName, setRegName] = useState<string>("");
   const [regEmail, setRegEmail] = useState<string>("");
   const [regPhone, setRegPhone] = useState<string>("");
+  const [regPassword, setRegPassword] = useState<string>("");
   const [regError, setRegError] = useState<string>("");
   const [regSuccess, setRegSuccess] = useState<string>("");
 
@@ -124,12 +125,16 @@ export default function App() {
   };
 
   // Login handler
-  const handleLoginSubmit = async (emailString: string): Promise<boolean> => {
+  const handleLoginSubmit = async (emailString: string, passwordString?: string): Promise<boolean> => {
     try {
+      const payload: any = { email: emailString };
+      if (passwordString) {
+        payload.password = passwordString;
+      }
       const resp = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailString })
+        body: JSON.stringify(payload)
       });
 
       if (resp.ok) {
@@ -152,8 +157,13 @@ export default function App() {
     setRegError("");
     setRegSuccess("");
 
-    if (!regName.trim() || !regEmail.trim()) {
-      setRegError("Namen- und E-Mail-Adresse sind Pflichtfelder!");
+    if (!regName.trim() || !regEmail.trim() || !regPassword.trim()) {
+      setRegError("Name, E-Mail-Adresse und Passwort sind Pflichtfelder!");
+      return;
+    }
+
+    if (regPassword.length < 6) {
+      setRegError("Das Passwort muss mindestens 6 Zeichen lang sein.");
       return;
     }
 
@@ -164,7 +174,8 @@ export default function App() {
         body: JSON.stringify({
           name: regName.trim(),
           email: regEmail.trim(),
-          phone: regPhone.trim()
+          phone: regPhone.trim(),
+          password: regPassword.trim()
         })
       });
 
@@ -180,6 +191,7 @@ export default function App() {
         setRegName("");
         setRegEmail("");
         setRegPhone("");
+        setRegPassword("");
         setIsRegistering(false);
         setActiveView("browse");
       } else {
@@ -884,6 +896,18 @@ export default function App() {
                         />
                       </div>
 
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Passwort *</label>
+                        <input
+                          type="password"
+                          value={regPassword}
+                          onChange={(e) => setRegPassword(e.target.value)}
+                          placeholder="Mindestens 6 Zeichen"
+                          className="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold"
+                          required
+                        />
+                      </div>
+
                       {regError && (
                         <p className="text-xs font-semibold text-rose-600 bg-rose-50 p-3 rounded-xl">
                           {regError}
@@ -925,19 +949,19 @@ export default function App() {
                       <p className="text-xs font-bold text-slate-700 uppercase tracking-wider text-center">In 1-Klick mit Demo-Accounts testen:</p>
                       <div className="grid grid-cols-1 ssm:grid-cols-2 gap-2">
                         <button
-                          onClick={() => handleLoginSubmit("kaeufer@autohaus.de")}
+                          onClick={() => handleLoginSubmit("kaeufer@autohaus.de", "kaeufer123")}
                           className="py-1.5 px-3 bg-white border border-slate-200 rounded-xl hover:border-sky-500 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
                         >
                           🚗 Käufer Login
                         </button>
                         <button
-                          onClick={() => handleLoginSubmit("max.mustermann@autohaus.de")}
+                          onClick={() => handleLoginSubmit("max.mustermann@autohaus.de", "max123")}
                           className="py-1.5 px-3 bg-white border border-slate-200 rounded-xl hover:border-sky-500 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
                         >
                           💼 Verkäufer Login
                         </button>
                         <button
-                          onClick={() => handleLoginSubmit("admin@autohaus.de")}
+                          onClick={() => handleLoginSubmit("admin@autohaus.de", "admin123")}
                           className="col-span-1 ssm:col-span-2 py-1.5 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
                         >
                           🛡️ Administrator Login

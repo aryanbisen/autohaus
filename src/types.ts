@@ -7,6 +7,7 @@ export interface User {
   isAdmin?: boolean;
   registeredAt: string;
   token?: string;
+  password?: string;
 }
 
 export interface Listing {

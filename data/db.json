@@ -4,31 +4,34 @@
       "id": "user-admin",
       "email": "admin@autohaus.de",
       "name": "Admin Administrator",
-      "phone": "+49 170 11122233",
+      "phone": "d98d0b6d87966e69005cf7b7d56c93fb:63d263d0894437fb857ca92bd615b4ec9300bceec97094d55789588ba4044bff",
       "avatarUrl": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150",
       "isAdmin": true,
       "registeredAt": "2026-06-10T10:00:00Z",
-      "token": "token-admin"
+      "token": "token-admin",
+      "password": "8a9cdb47939f02bce1eee0183c3405fd:bc83de045ec0a4ae0e79046c1c1c742bc5f4145cea6b4ea5b8db6f518737f3f4195e1f554098d4cbe75ae34e5621ef9169b10e0e4a3ebd821908230f3750342d"
     },
     {
       "id": "user-seller1",
       "email": "max.mustermann@autohaus.de",
       "name": "Max Mustermann",
-      "phone": "+49 171 9876543",
+      "phone": "109d834e748341ba3cc9cb311e04df8a:e7c1ebc5d6168d463be13a0389e586d6",
       "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=150",
       "isAdmin": false,
       "registeredAt": "2026-06-11T12:00:00Z",
-      "token": "4eceb44128f9b0d6d3501761b5d680aaf6bc74e54431480fba87a67e8146ffdc"
+      "token": "token-max",
+      "password": "15e6379e95d23f90b2a2ae7438848c39:cbc4a442e83179dc64c202e6a4ba3445a86aa38406dc7ce13af64343c8a0fa2b7c47b475773bde958b6200c82e964d3762733753cca509918c98125a123bb5cb"
     },
     {
       "id": "user-seller2",
       "email": "kaeufer@autohaus.de",
       "name": "Anna Schmidt",
-      "phone": "+49 172 4455667",
+      "phone": "8c5a08017261a3ffd98ec9e43c623718:93ae5a1b2a9cde0616843edf7f17c9ae",
       "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150",
       "isAdmin": false,
       "registeredAt": "2026-06-12T14:30:00Z",
-      "token": "token-buyer"
+      "token": "token-buyer",
+      "password": "8b2583bbf0e0240bf631fe436cbbca20:707293fdc8a9858ee7a372b1cefdc611bc35ed229f6068d5a59e53237e52ed49a74963e880788216711ba13c7ad51c4b3649b5b3ed0335288fd28425a10aa0cd"
     }
   ],
   "listings": [
@@ -36,7 +39,7 @@
       "id": "listing-1",
       "sellerId": "user-seller1",
       "sellerName": "Max Mustermann",
-      "sellerPhone": "+49 171 9876543",
+      "sellerPhone": "a11c7ba291626f82123e014fa1622daa:b581cc7fb88043a428bfbbd856dafd44",
       "sellerLocation": "München",
       "brand": "Porsche",
       "model": "911 Carrera S",
@@ -59,7 +62,7 @@
       "id": "listing-2",
       "sellerId": "user-seller1",
       "sellerName": "Max Mustermann",
-      "sellerPhone": "+49 171 9876543",
+      "sellerPhone": "3353566369bcb64e35a04ebc8ba394fe:bc00c96ba3d1649ce0bbb603e091b395",
       "sellerLocation": "München",
       "brand": "VW",
       "model": "Golf VII GTI",
@@ -81,7 +84,7 @@
       "id": "listing-3",
       "sellerId": "user-seller2",
       "sellerName": "Anna Schmidt",
-      "sellerPhone": "+49 172 4455667",
+      "sellerPhone": "25398b99bcd54e11b48faddce26ed81c:5b6d41257c392f36db9608a6575efe18",
       "sellerLocation": "Hamburg",
       "brand": "Tesla",
       "model": "Model 3 Long Range",
@@ -103,7 +106,7 @@
       "id": "listing-4",
       "sellerId": "user-seller2",
       "sellerName": "Anna Schmidt",
-      "sellerPhone": "+49 172 4455667",
+      "sellerPhone": "cce0e9a49d90921eca6dd483dbc0b82b:3fdc2327270c35aab54b8499c5f8e5a8",
       "sellerLocation": "Hamburg",
       "brand": "BMW",
       "model": "320d Touring M-Sport",
@@ -124,7 +127,7 @@
       "id": "listing-pending",
       "sellerId": "user-seller1",
       "sellerName": "Max Mustermann",
-      "sellerPhone": "+49 171 9876543",
+      "sellerPhone": "e6f0908f85dc7a2ce0f1d47ccb591908:efbfbf108ee0190bed85227f95164f59",
       "sellerLocation": "München",
       "brand": "Mercedes",
       "model": "C63 AMG",
@@ -168,7 +171,7 @@
       "chatId": "chat-1",
       "senderId": "user-seller2",
       "receiverId": "user-seller1",
-      "content": "Hallo Max, ist der Preis noch leicht verhandelbar?",
+      "content": "c39165e4b4be3723b2bc5f9c098e8c2b:1b4d2908c642390e1dcd26cd9a35c2fa545f5fc5f6a4532108254656856a25dfdc4cc2fa2a07400f2649b834789b910ab08589a7c9b973aebf105dc0b5260907",
       "createdAt": "2026-06-15T07:00:00Z",
       "isRead": false
     }

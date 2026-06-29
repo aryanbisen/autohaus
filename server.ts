@@ -2,6 +2,10 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import crypto from "crypto";
+import https from "https";
+import http from "http";
+import selfsigned from "selfsigned";
+import helmet from "helmet";
 import { createServer as createViteServer } from "vite";
 import { User, Listing, Message, Chat, AdminStats } from "./src/types";
 
@@ -18,7 +22,8 @@ const defaultUsers: User[] = [
     avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150",
     isAdmin: true,
     registeredAt: "2026-06-10T10:00:00Z",
-    token: "token-admin"
+    token: "token-admin",
+    password: "admin123"
   },
   {
     id: "user-seller1",
@@ -28,7 +33,8 @@ const defaultUsers: User[] = [
     avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=150",
     isAdmin: false,
     registeredAt: "2026-06-11T12:00:00Z",
-    token: "token-max"
+    token: "token-max",
+    password: "max123"
   },
   {
     id: "user-seller2",
@@ -38,7 +44,8 @@ const defaultUsers: User[] = [
     avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150",
     isAdmin: false,
     registeredAt: "2026-06-12T14:30:00Z",
-    token: "token-buyer"
+    token: "token-buyer",
+    password: "kaeufer123"
   }
 ];
 
@@ -198,8 +205,12 @@ function initDb() {
     fs.mkdirSync(DB_DIR, { recursive: true });
   }
   if (!fs.existsSync(DB_FILE)) {
+    const usersWithHashedPasswords = defaultUsers.map(u => ({
+      ...u,
+      password: u.password ? hashPassword(u.password) : undefined
+    }));
     const db: Database = {
-      users: defaultUsers,
+      users: usersWithHashedPasswords,
       listings: defaultListings,
       chats: defaultChats,
       messages: defaultMessages,
@@ -207,11 +218,28 @@ function initDb() {
         "user-seller2": ["listing-1", "listing-2"]
       }
     };
-    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf-8");
+    // Note: writeDb is not used here directly to write seeded data because it would encrypt
+    // fields. Actually, we want to write encrypted data to disk even on seeding!
+    // So let's write plain and writeDb will encrypt on subsequent edits, OR let's use writeDb!
+    // Using writeDb(db) is better because it encrypts the seeded data immediately!
+    writeDb(db);
   } else {
     try {
       const content = fs.readFileSync(DB_FILE, "utf-8");
-      const db: Database = JSON.parse(content);
+      const db: Database = JSON.parse(content); // readDb is not called here to avoid decrypting, but wait!
+      // Since readDb decrypts, if we read plain content from fs, it's encrypted!
+      // Oh! That is an important detail!
+      // In initDb(), we read DB_FILE directly using fs.readFileSync. If it is already encrypted,
+      // parsing it as JSON is fine, but the values are encrypted.
+      // So to make sure we compare plain emails, we should decrypt them!
+      // Let's use readDb() here! Wait, if we use readDb(), it calls initDb() recursively! That will cause an infinite loop!
+      // Ah! That is a very important catch!
+      // So let's write a local readDecryptedDb() helper or just do decryption inside initDb:
+      const decryptedUsers = db.users ? db.users.map(u => ({
+        ...u,
+        phone: u.phone ? decrypt(u.phone) : u.phone
+      })) : [];
+
       let updated = false;
 
       if (!db.users) {
@@ -219,23 +247,30 @@ function initDb() {
         updated = true;
       }
       for (const defUser of defaultUsers) {
-        if (!db.users.some(u => u.email.toLowerCase() === defUser.email.toLowerCase())) {
-          db.users.push(defUser);
+        if (!decryptedUsers.some(u => u.email.toLowerCase() === defUser.email.toLowerCase())) {
+          db.users.push({
+            ...defUser,
+            password: defUser.password ? hashPassword(defUser.password) : undefined
+          });
           updated = true;
         }
       }
 
-      // Ensure every user has a token
+      // Ensure every user has a token and a password
       for (const u of db.users) {
+        let userUpdated = false;
         if (!u.token) {
           const matchingDefault = defaultUsers.find(d => d.email.toLowerCase() === u.email.toLowerCase());
-          if (matchingDefault) {
-            u.token = matchingDefault.token;
-          } else {
-            u.token = crypto.randomBytes(32).toString("hex");
-          }
-          updated = true;
+          u.token = matchingDefault ? matchingDefault.token : crypto.randomBytes(32).toString("hex");
+          userUpdated = true;
         }
+        if (!u.password) {
+          const matchingDefault = defaultUsers.find(d => d.email.toLowerCase() === u.email.toLowerCase());
+          const plainPass = matchingDefault ? matchingDefault.password : "fallback123";
+          u.password = hashPassword(plainPass!);
+          userUpdated = true;
+        }
+        if (userUpdated) updated = true;
       }
 
       if (!db.listings) {
@@ -291,7 +326,29 @@ function readDb(): Database {
   initDb();
   try {
     const content = fs.readFileSync(DB_FILE, "utf-8");
-    return JSON.parse(content);
+    const db: Database = JSON.parse(content);
+
+    // Decrypt sensitive fields transparently for application use
+    if (db.users) {
+      db.users = db.users.map(u => ({
+        ...u,
+        phone: u.phone ? decrypt(u.phone) : u.phone
+      }));
+    }
+    if (db.listings) {
+      db.listings = db.listings.map(l => ({
+        ...l,
+        sellerPhone: l.sellerPhone ? decrypt(l.sellerPhone) : l.sellerPhone
+      }));
+    }
+    if (db.messages) {
+      db.messages = db.messages.map(m => ({
+        ...m,
+        content: m.content ? decrypt(m.content) : m.content
+      }));
+    }
+
+    return db;
   } catch (error) {
     console.error("Error reading database file", error);
     return { users: [], listings: [], chats: [], messages: [], favorites: {} };
@@ -300,10 +357,79 @@ function readDb(): Database {
 
 function writeDb(db: Database) {
   try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf-8");
+    // Clone to prevent mutating in-memory runtime objects
+    const encryptedDb = JSON.parse(JSON.stringify(db));
+
+    // Encrypt sensitive fields before saving to disk
+    if (encryptedDb.users) {
+      encryptedDb.users = encryptedDb.users.map((u: any) => ({
+        ...u,
+        phone: u.phone ? encrypt(u.phone) : u.phone
+      }));
+    }
+    if (encryptedDb.listings) {
+      encryptedDb.listings = encryptedDb.listings.map((l: any) => ({
+        ...l,
+        sellerPhone: l.sellerPhone ? encrypt(l.sellerPhone) : l.sellerPhone
+      }));
+    }
+    if (encryptedDb.messages) {
+      encryptedDb.messages = encryptedDb.messages.map((m: any) => ({
+        ...m,
+        content: m.content ? encrypt(m.content) : m.content
+      }));
+    }
+
+    fs.writeFileSync(DB_FILE, JSON.stringify(encryptedDb, null, 2), "utf-8");
   } catch (error) {
     console.error("Error writing database file", error);
   }
+}
+
+// ----------------- CRYPTOGRAPHY HELPERS -----------------
+
+// Symmetric Encryption (AES-256-CBC) for database fields
+const ENCRYPTION_KEY = crypto.scryptSync("autohaus-secure-key-12345", "autohaus-salt", 32); // 32-byte key
+const IV_LENGTH = 16;
+
+function encrypt(text: string): string {
+  if (!text) return "";
+  const iv = crypto.randomBytes(IV_LENGTH);
+  const cipher = crypto.createCipheriv("aes-256-cbc", ENCRYPTION_KEY, iv);
+  let encrypted = cipher.update(text, "utf8", "hex");
+  encrypted += cipher.final("hex");
+  return iv.toString("hex") + ":" + encrypted;
+}
+
+function decrypt(text: string): string {
+  if (!text) return "";
+  try {
+    const textParts = text.split(":");
+    if (textParts.length < 2) return text; // If not encrypted, return as is
+    const iv = Buffer.from(textParts.shift()!, "hex");
+    const encryptedText = textParts.join(":");
+    const decipher = crypto.createDecipheriv("aes-256-cbc", ENCRYPTION_KEY, iv);
+    let decrypted = decipher.update(encryptedText, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+    return decrypted;
+  } catch (e) {
+    // If decryption fails (e.g. data was plaintext), fallback to return original text
+    return text;
+  }
+}
+
+// Memory-hard salted hashing (scrypt) for passwords
+function hashPassword(password: string): string {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const hash = crypto.scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${hash}`;
+}
+
+function verifyPassword(password: string, storedValue: string): boolean {
+  if (!storedValue || !storedValue.includes(":")) return false;
+  const [salt, hash] = storedValue.split(":");
+  const testHash = crypto.scryptSync(password, salt, 64).toString("hex");
+  return hash === testHash;
 }
 
 // ----------------- SECURITY MIDDLEWARES -----------------
@@ -371,6 +497,28 @@ async function startServer() {
   const app = express();
   app.use(express.json({ limit: "20mb" }));
 
+  // Security Headers via Helmet (includes HSTS for Transport Security)
+  app.use(helmet({
+    strictTransportSecurity: {
+      maxAge: 31536000,       // 1 year in seconds
+      includeSubDomains: true,
+      preload: true
+    },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "https://images.unsplash.com", "https://api.dicebear.com"],
+        connectSrc: ["'self'", "wss:", "ws:"],
+      }
+    },
+    xContentTypeOptions: true,      // X-Content-Type-Options: nosniff
+    xFrameOptions: { action: "deny" }, // Clickjacking protection
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" }
+  }));
+
   // Apply general API rate limiter (300 requests per minute)
   app.use("/api", rateLimiter(60000, 300));
   
@@ -380,9 +528,12 @@ async function startServer() {
 
   // API - Auth Endpoints
   app.post("/api/auth/register", (req, res) => {
-    const { name, email, phone } = req.body;
-    if (!name || !email) {
-      return res.status(400).json({ error: "Name und E-Mail-Adresse sind erforderlich." });
+    const { name, email, phone, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "Name, E-Mail-Adresse und Passwort sind erforderlich." });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Das Passwort muss mindestens 6 Zeichen lang sein." });
     }
 
     const db = readDb();
@@ -394,15 +545,17 @@ async function startServer() {
     }
 
     const token = crypto.randomBytes(32).toString("hex");
+    const hashedPassword = hashPassword(password);
     const newUser: User = {
-      id: "user-" + Math.random().toString(36).substring(2, 11),
+      id: "user-" + crypto.randomUUID(),
       email: normalizedEmail,
       name,
       phone: phone || "",
       avatarUrl: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(name)}`,
       isAdmin: false,
       registeredAt: new Date().toISOString(),
-      token
+      token,
+      password: hashedPassword
     };
 
     db.users.push(newUser);
@@ -411,7 +564,7 @@ async function startServer() {
   });
 
   app.post("/api/auth/login", (req, res) => {
-    const { email } = req.body;
+    const { email, password } = req.body;
     if (!email) {
       return res.status(400).json({ error: "E-Mail-Adresse ist erforderlich." });
     }
@@ -421,7 +574,17 @@ async function startServer() {
     const userIndex = db.users.findIndex(u => u.email.toLowerCase() === normalizedEmail);
 
     if (userIndex === -1) {
-      return res.status(401).json({ error: "Benutzer nicht gefunden. Bitte registrieren Sie sich zuerst." });
+      return res.status(401).json({ error: "E-Mail-Adresse oder Passwort falsch." });
+    }
+
+    const user = db.users[userIndex];
+
+    if (user.password && password) {
+      if (!verifyPassword(password, user.password)) {
+        return res.status(401).json({ error: "E-Mail-Adresse oder Passwort falsch." });
+      }
+    } else if (user.password && !password) {
+      return res.status(401).json({ error: "Passwort erforderlich." });
     }
 
     // Refresh token on login for better security
@@ -560,7 +723,7 @@ async function startServer() {
     const isApproved = user.isAdmin === true ? true : false;
 
     const newListing: Listing = {
-      id: "listing-" + Math.random().toString(36).substring(2, 11),
+      id: "listing-" + crypto.randomUUID(),
       sellerId,
       sellerName: user.name,
       sellerPhone: user.phone,
@@ -731,7 +894,7 @@ async function startServer() {
 
     if (!chat) {
       chat = {
-        id: "chat-" + Math.random().toString(36).substring(2, 11),
+        id: "chat-" + crypto.randomUUID(),
         listingId,
         listingBrand: listing.brand,
         listingModel: listing.model,
@@ -762,7 +925,7 @@ async function startServer() {
     }
 
     const newMessage: Message = {
-      id: "msg-" + Math.random().toString(36).substring(2, 11),
+      id: "msg-" + crypto.randomUUID(),
       chatId: chat.id,
       senderId,
       receiverId,
@@ -916,7 +1079,14 @@ async function startServer() {
   // Vite middleware for development or fallback static files for production
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: {
+          protocol: "wss",
+          host: "localhost",
+          port: 3443
+        }
+      },
       appType: "spa",
     });
     app.use(vite.middlewares);
@@ -928,9 +1098,42 @@ async function startServer() {
     });
   }
 
-  const PORT = 3000;
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`);
+  // --- TLS / HTTPS Setup ---
+  // Generate self-signed certificates for development
+  const attrs = [{ name: "commonName", value: "localhost" }];
+  const pems = selfsigned.generate(attrs, {
+    keySize: 2048,
+    days: 365,
+    algorithm: "sha256",
+    extensions: [
+      { name: "subjectAltName", altNames: [{ type: 2, value: "localhost" }] }
+    ]
+  });
+
+  const HTTPS_PORT = 3443;
+  const HTTP_PORT = 3000;
+
+  // Create HTTPS server with the self-signed certificate
+  const httpsServer = https.createServer(
+    { key: pems.private, cert: pems.cert },
+    app
+  );
+
+  httpsServer.listen(HTTPS_PORT, "0.0.0.0", () => {
+    console.log(`\n🔒 HTTPS server running on https://localhost:${HTTPS_PORT}`);
+    console.log(`   TLS/SSL enabled with self-signed certificate`);
+    console.log(`   HSTS header active (max-age: 1 year)`);
+  });
+
+  // Create HTTP server that redirects all traffic to HTTPS
+  const httpRedirectApp = express();
+  httpRedirectApp.use((req, res) => {
+    const httpsUrl = `https://${req.hostname}:${HTTPS_PORT}${req.url}`;
+    res.redirect(301, httpsUrl);
+  });
+
+  http.createServer(httpRedirectApp).listen(HTTP_PORT, "0.0.0.0", () => {
+    console.log(`🔀 HTTP redirect server on http://localhost:${HTTP_PORT} → https://localhost:${HTTPS_PORT}`);
   });
 }
 
