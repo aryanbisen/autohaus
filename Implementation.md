@@ -200,3 +200,97 @@ app.use("/api/auth/register", rateLimiter(60000, 10, "Zu viele Registrierungsver
 - Das **Registrierungslimit** (10/min) verhindert die massenhafte Erstellung von Spam-Konten.
 - Der `Retry-After`-Header informiert den Client gemäß RFC-Standard, wann er es erneut versuchen darf.
 
+---
+
+# Kryptographie & Transportsicherheit
+
+### 4. Transport Layer Security (TLS) mit HTTPS & HSTS
+
+#### Was wurde implementiert?
+Der Express-Server läuft jetzt über **HTTPS** (Port 3443) mit einem selbst-signierten TLS-Zertifikat. HTTP-Anfragen auf Port 3000 werden automatisch auf HTTPS umgeleitet.
+
+##### a) Selbst-signierte Zertifikate ([server.ts](file:///c:/Users/Aryan/Downloads/autohaus/server.ts#L1082-L1092))
+```typescript
+// server.ts – TLS/HTTPS Setup
+const attrs = [{ name: "commonName", value: "localhost" }];
+const pems = selfsigned.generate(attrs, {
+  keySize: 2048,
+  days: 365,
+  algorithm: "sha256",
+  extensions: [
+    { name: "subjectAltName", altNames: [{ type: 2, value: "localhost" }] }
+  ]
+});
+```
+
+##### b) HTTPS-Server ([server.ts](file:///c:/Users/Aryan/Downloads/autohaus/server.ts#L1097-L1103))
+```typescript
+const httpsServer = https.createServer(
+  { key: pems.private, cert: pems.cert },
+  app
+);
+httpsServer.listen(3443, "0.0.0.0", () => {
+  console.log("🔒 HTTPS server running on https://localhost:3443");
+});
+```
+
+##### c) HTTP→HTTPS Redirect ([server.ts](file:///c:/Users/Aryan/Downloads/autohaus/server.ts#L1107-L1114))
+```typescript
+const httpRedirectApp = express();
+httpRedirectApp.use((req, res) => {
+  const httpsUrl = `https://${req.hostname}:${HTTPS_PORT}${req.url}`;
+  res.redirect(301, httpsUrl);
+});
+http.createServer(httpRedirectApp).listen(3000);
+```
+
+##### d) HSTS & Security Headers via Helmet ([server.ts](file:///c:/Users/Aryan/Downloads/autohaus/server.ts#L500-L521))
+```typescript
+app.use(helmet({
+  strictTransportSecurity: {
+    maxAge: 31536000,       // 1 Jahr
+    includeSubDomains: true,
+    preload: true
+  },
+  contentSecurityPolicy: { ... },
+  xContentTypeOptions: true,       // X-Content-Type-Options: nosniff
+  xFrameOptions: { action: "deny" }, // Clickjacking-Schutz
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
+}));
+```
+
+#### Warum nützlich?
+- **TLS** verschlüsselt die gesamte Kommunikation zwischen Browser und Server. Ohne TLS könnten Angreifer im gleichen Netzwerk (z.B. öffentliches WLAN) Passwörter, Tokens und Nachrichten mitlesen (**Man-in-the-Middle-Angriff**).
+- **HSTS** weist den Browser an, für 1 Jahr nur noch HTTPS-Verbindungen zu akzeptieren – selbst wenn der Benutzer `http://` eingibt.
+- **CSP** (Content Security Policy) verhindert Cross-Site-Scripting (XSS) durch Einschränkung erlaubter Skript-Quellen.
+
+---
+
+### 5. Hashing (At Rest) – Passwort-Schutz mit Scrypt
+
+#### Was wurde implementiert?
+Passwörter werden **niemals im Klartext** gespeichert, sondern mit dem speicherintensiven **scrypt**-Algorithmus gehasht und gesalzen.
+
+#### ([server.ts](file:///c:/Users/Aryan/Downloads/autohaus/server.ts#L422-L433))
+
+```typescript
+function hashPassword(password: string): string {
+  const salt = crypto.randomBytes(16).toString("hex"); // 16 Byte Zufalls-Salt
+  const hash = crypto.scryptSync(password, salt, 64).toString("hex"); // 64 Byte Hash
+  return `${salt}:${hash}`;
+}
+
+function verifyPassword(password: string, storedValue: string): boolean {
+  const [salt, hash] = storedValue.split(":");
+  const testHash = crypto.scryptSync(password, salt, 64).toString("hex");
+  return hash === testHash;
+}
+```
+
+#### Warum nützlich?
+- **Salted Hashing** bedeutet: Selbst wenn zwei Benutzer dasselbe Passwort wählen, sind ihre gespeicherten Hashes unterschiedlich (wegen des zufälligen Salts).
+- **Scrypt** ist ein **speicherintensiver** (memory-hard) Algorithmus. Das macht Brute-Force-Angriffe mit GPUs oder ASICs extrem teuer, da jeder Hash-Versuch viel RAM benötigt.
+- Wenn die Datenbank kompromittiert wird, kann ein Angreifer die Passwörter **nicht direkt lesen** – er müsste jeden Hash einzeln knacken.
+
+---
+
