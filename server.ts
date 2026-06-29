@@ -1,6 +1,7 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
+import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
 import { User, Listing, Message, Chat, AdminStats } from "./src/types";
 
@@ -16,7 +17,8 @@ const defaultUsers: User[] = [
     phone: "+49 170 11122233",
     avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150",
     isAdmin: true,
-    registeredAt: "2026-06-10T10:00:00Z"
+    registeredAt: "2026-06-10T10:00:00Z",
+    token: "token-admin"
   },
   {
     id: "user-seller1",
@@ -25,7 +27,8 @@ const defaultUsers: User[] = [
     phone: "+49 171 9876543",
     avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=150",
     isAdmin: false,
-    registeredAt: "2026-06-11T12:00:00Z"
+    registeredAt: "2026-06-11T12:00:00Z",
+    token: "token-max"
   },
   {
     id: "user-seller2",
@@ -34,7 +37,8 @@ const defaultUsers: User[] = [
     phone: "+49 172 4455667",
     avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150",
     isAdmin: false,
-    registeredAt: "2026-06-12T14:30:00Z"
+    registeredAt: "2026-06-12T14:30:00Z",
+    token: "token-buyer"
   }
 ];
 
@@ -221,6 +225,19 @@ function initDb() {
         }
       }
 
+      // Ensure every user has a token
+      for (const u of db.users) {
+        if (!u.token) {
+          const matchingDefault = defaultUsers.find(d => d.email.toLowerCase() === u.email.toLowerCase());
+          if (matchingDefault) {
+            u.token = matchingDefault.token;
+          } else {
+            u.token = crypto.randomBytes(32).toString("hex");
+          }
+          updated = true;
+        }
+      }
+
       if (!db.listings) {
         db.listings = [];
         updated = true;
@@ -289,10 +306,77 @@ function writeDb(db: Database) {
   }
 }
 
+// ----------------- SECURITY MIDDLEWARES -----------------
+
+// 1. Rate Limiting for DoS Protection
+interface RateLimitRecord {
+  count: number;
+  resetTime: number;
+}
+const rateLimits = new Map<string, RateLimitRecord>();
+
+function rateLimiter(windowMs: number, maxRequests: number, message = "Zu viele Anfragen. Bitte versuchen Sie es später noch einmal.") {
+  return (req: any, res: any, next: any) => {
+    const ip = req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const now = Date.now();
+
+    let record = rateLimits.get(ip);
+    if (!record || now > record.resetTime) {
+      record = {
+        count: 0,
+        resetTime: now + windowMs
+      };
+    }
+
+    record.count++;
+    rateLimits.set(ip, record);
+
+    if (record.count > maxRequests) {
+      res.setHeader("Retry-After", Math.ceil((record.resetTime - now) / 1000));
+      return res.status(429).json({ error: message });
+    }
+    next();
+  };
+}
+
+// 2. Authentication Middleware (Confidentiality)
+function authenticateToken(req: any, res: any, next: any) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ error: "Authentifizierung erforderlich. Bitte melden Sie sich an." });
+  }
+
+  const db = readDb();
+  const user = db.users.find(u => u.token === token);
+  if (!user) {
+    return res.status(401).json({ error: "Ungültiges oder abgelaufenes Sitzungstoken. Bitte melden Sie sich erneut an." });
+  }
+
+  req.user = user;
+  next();
+}
+
+// 3. Admin Authorization Middleware (Integrity)
+function requireAdmin(req: any, res: any, next: any) {
+  if (!req.user || !req.user.isAdmin) {
+    return res.status(403).json({ error: "Zugriff verweigert. Administratorrechte erforderlich." });
+  }
+  next();
+}
+
 async function startServer() {
   initDb();
   const app = express();
   app.use(express.json({ limit: "20mb" }));
+
+  // Apply general API rate limiter (300 requests per minute)
+  app.use("/api", rateLimiter(60000, 300));
+  
+  // Apply stricter login/register rate limiters
+  app.use("/api/auth/login", rateLimiter(60000, 15, "Zu viele Loginversuche. Bitte versuchen Sie es in einer Minute wieder."));
+  app.use("/api/auth/register", rateLimiter(60000, 10, "Zu viele Registrierungsversuche. Bitte versuchen Sie es in einer Minute wieder."));
 
   // API - Auth Endpoints
   app.post("/api/auth/register", (req, res) => {
@@ -309,6 +393,7 @@ async function startServer() {
       return res.status(400).json({ error: "Ein Benutzer mit dieser E-Mail existiert bereits." });
     }
 
+    const token = crypto.randomBytes(32).toString("hex");
     const newUser: User = {
       id: "user-" + Math.random().toString(36).substring(2, 11),
       email: normalizedEmail,
@@ -316,7 +401,8 @@ async function startServer() {
       phone: phone || "",
       avatarUrl: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(name)}`,
       isAdmin: false,
-      registeredAt: new Date().toISOString()
+      registeredAt: new Date().toISOString(),
+      token
     };
 
     db.users.push(newUser);
@@ -332,19 +418,29 @@ async function startServer() {
 
     const db = readDb();
     const normalizedEmail = email.toLowerCase().trim();
-    const user = db.users.find(u => u.email.toLowerCase() === normalizedEmail);
+    const userIndex = db.users.findIndex(u => u.email.toLowerCase() === normalizedEmail);
 
-    if (!user) {
+    if (userIndex === -1) {
       return res.status(401).json({ error: "Benutzer nicht gefunden. Bitte registrieren Sie sich zuerst." });
     }
 
-    res.json(user);
+    // Refresh token on login for better security
+    const token = crypto.randomBytes(32).toString("hex");
+    db.users[userIndex].token = token;
+    writeDb(db);
+
+    res.json(db.users[userIndex]);
   });
 
-  app.put("/api/auth/profile", (req, res) => {
+  app.put("/api/auth/profile", authenticateToken, (req, res) => {
     const { userId, name, phone, avatarUrl } = req.body;
     if (!userId) {
       return res.status(400).json({ error: "Benutzer-ID fehlt." });
+    }
+
+    // IDOR Check: Users can only update their own profile
+    if (req.user.id !== userId) {
+      return res.status(403).json({ error: "Sie können nur Ihr eigenes Profil bearbeiten." });
     }
 
     const db = readDb();
@@ -442,11 +538,16 @@ async function startServer() {
     res.json(listing);
   });
 
-  app.post("/api/listings", (req, res) => {
+  app.post("/api/listings", authenticateToken, (req, res) => {
     const { sellerId, brand, model, mileage, year, fuelType, transmission, price, description, images, location } = req.body;
     
     if (!sellerId || !brand || !model || !mileage || !year || !fuelType || !transmission || !price || !description) {
       return res.status(400).json({ error: "Alle Pflichtfelder müssen ausgefüllt sein." });
+    }
+
+    // Integrity Check: Make sure the seller ID matches the logged-in user
+    if (req.user.id !== sellerId) {
+      return res.status(403).json({ error: "Sie sind nicht berechtigt, ein Inserat für diesen Benutzer zu erstellen." });
     }
 
     const db = readDb();
@@ -483,7 +584,7 @@ async function startServer() {
     res.status(201).json(newListing);
   });
 
-  app.put("/api/listings/:id", (req, res) => {
+  app.put("/api/listings/:id", authenticateToken, (req, res) => {
     const { id } = req.params;
     const { brand, model, mileage, year, fuelType, transmission, price, description, images, location } = req.body;
 
@@ -492,6 +593,12 @@ async function startServer() {
 
     if (index === -1) {
       return res.status(404).json({ error: "Inserat nicht gefunden." });
+    }
+
+    // Integrity Check: Only the listing owner or an administrator can edit vehicle listings
+    const listing = db.listings[index];
+    if (listing.sellerId !== req.user.id && !req.user.isAdmin) {
+      return res.status(403).json({ error: "Zugriff verweigert. Sie können nur Ihre eigenen Inserate bearbeiten." });
     }
 
     db.listings[index] = {
@@ -512,7 +619,7 @@ async function startServer() {
     res.json(db.listings[index]);
   });
 
-  app.delete("/api/listings/:id", (req, res) => {
+  app.delete("/api/listings/:id", authenticateToken, (req, res) => {
     const { id } = req.params;
     const db = readDb();
     const index = db.listings.findIndex(l => l.id === id);
@@ -521,12 +628,18 @@ async function startServer() {
       return res.status(404).json({ error: "Inserat nicht gefunden." });
     }
 
+    // Integrity Check: Only the listing owner or an administrator can delete vehicle listings
+    const listing = db.listings[index];
+    if (listing.sellerId !== req.user.id && !req.user.isAdmin) {
+      return res.status(403).json({ error: "Zugriff verweigert. Sie können nur Ihre eigenen Inserate löschen." });
+    }
+
     db.listings.splice(index, 1);
     writeDb(db);
     res.json({ success: true, message: "Inserat erfolgreich gelöscht." });
   });
 
-  app.patch("/api/listings/:id/status", (req, res) => {
+  app.patch("/api/listings/:id/status", authenticateToken, (req, res) => {
     const { id } = req.params;
     const { status } = req.body; // 'active' | 'sold' | 'inactive'
 
@@ -541,16 +654,27 @@ async function startServer() {
       return res.status(404).json({ error: "Inserat nicht gefunden." });
     }
 
+    // Integrity Check: Only the listing owner or an administrator can change status
+    const listing = db.listings[index];
+    if (listing.sellerId !== req.user.id && !req.user.isAdmin) {
+      return res.status(403).json({ error: "Zugriff verweigert. Sie können nur den Status Ihrer eigenen Inserate ändern." });
+    }
+
     db.listings[index].status = status;
     writeDb(db);
     res.json(db.listings[index]);
   });
 
   // API - Chats & Messaging Endpoints
-  app.get("/api/chats", (req, res) => {
+  app.get("/api/chats", authenticateToken, (req, res) => {
     const { userId } = req.query;
     if (!userId) {
       return res.status(400).json({ error: "Benutzer-ID fehlt." });
+    }
+
+    // Confidentiality Check: Users can only retrieve their own chat inbox
+    if (req.user.id !== userId && !req.user.isAdmin) {
+      return res.status(403).json({ error: "Zugriff verweigert. Sie können nur Ihre eigenen Chats abrufen." });
     }
 
     const db = readDb();
@@ -559,18 +683,33 @@ async function startServer() {
     res.json(userChats);
   });
 
-  app.get("/api/chats/:id/messages", (req, res) => {
+  app.get("/api/chats/:id/messages", authenticateToken, (req, res) => {
     const { id } = req.params;
     const db = readDb();
+    const chat = db.chats.find(c => c.id === id);
+    if (!chat) {
+      return res.status(404).json({ error: "Chat nicht gefunden." });
+    }
+
+    // Confidentiality Check: Only the chat participants (buyer/seller) or an admin can access messages
+    if (chat.buyerId !== req.user.id && chat.sellerId !== req.user.id && !req.user.isAdmin) {
+      return res.status(403).json({ error: "Zugriff verweigert. Sie haben keinen Zugriff auf diesen Chat." });
+    }
+
     const chatMessages = db.messages.filter(m => m.chatId === id).sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     res.json(chatMessages);
   });
 
-  app.post("/api/chats/messages", (req, res) => {
+  app.post("/api/chats/messages", authenticateToken, (req, res) => {
     const { senderId, senderName, receiverId, listingId, content } = req.body;
 
     if (!senderId || !receiverId || !listingId || !content) {
       return res.status(400).json({ error: "Ungültige Nachrichtendaten." });
+    }
+
+    // Integrity Check: Make sure the message sender matches the logged-in user
+    if (req.user.id !== senderId) {
+      return res.status(403).json({ error: "Zugriff verweigert. Ungültige Absender-ID." });
     }
 
     const db = readDb();
@@ -637,12 +776,17 @@ async function startServer() {
     res.status(201).json({ message: newMessage, chat });
   });
 
-  app.post("/api/chats/:id/read", (req, res) => {
+  app.post("/api/chats/:id/read", authenticateToken, (req, res) => {
     const { id } = req.params;
     const { userId } = req.body;
 
     if (!userId) {
       return res.status(400).json({ error: "Benutzer-ID fehlt." });
+    }
+
+    // Integrity Check: Make sure the read request is for the logged-in user
+    if (req.user.id !== userId) {
+      return res.status(403).json({ error: "Zugriff verweigert." });
     }
 
     const db = readDb();
@@ -669,10 +813,15 @@ async function startServer() {
   });
 
   // API - Favorites Endpoints
-  app.get("/api/favorites", (req, res) => {
+  app.get("/api/favorites", authenticateToken, (req, res) => {
     const { userId } = req.query;
     if (!userId) {
       return res.status(400).json({ error: "Benutzer-ID fehlt." });
+    }
+
+    // Confidentiality Check: Users can only access their own favorites
+    if (req.user.id !== userId && !req.user.isAdmin) {
+      return res.status(403).json({ error: "Zugriff verweigert. Sie können nur Ihre eigenen Favoriten einsehen." });
     }
 
     const db = readDb();
@@ -681,10 +830,15 @@ async function startServer() {
     res.json(favoriteListings);
   });
 
-  app.post("/api/favorites/toggle", (req, res) => {
+  app.post("/api/favorites/toggle", authenticateToken, (req, res) => {
     const { userId, listingId } = req.body;
     if (!userId || !listingId) {
       return res.status(400).json({ error: "Benutzer-ID und Inserat-ID erforderlich." });
+    }
+
+    // Integrity Check: Users can only toggle favorites for themselves
+    if (req.user.id !== userId) {
+      return res.status(403).json({ error: "Zugriff verweigert." });
     }
 
     const db = readDb();
@@ -708,12 +862,12 @@ async function startServer() {
   });
 
   // API - Admin Endpoints
-  app.get("/api/admin/users", (req, res) => {
+  app.get("/api/admin/users", authenticateToken, requireAdmin, (req, res) => {
     const db = readDb();
     res.json(db.users);
   });
 
-  app.post("/api/admin/listings/:id/approve", (req, res) => {
+  app.post("/api/admin/listings/:id/approve", authenticateToken, requireAdmin, (req, res) => {
     const { id } = req.params;
     const db = readDb();
     const index = db.listings.findIndex(l => l.id === id);
@@ -727,7 +881,7 @@ async function startServer() {
     res.json(db.listings[index]);
   });
 
-  app.get("/api/admin/stats", (req, res) => {
+  app.get("/api/admin/stats", authenticateToken, requireAdmin, (req, res) => {
     const db = readDb();
     
     // Group active user registrations by day for the chart

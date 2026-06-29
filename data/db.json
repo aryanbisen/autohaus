@@ -1,22 +1,14 @@
 {
   "users": [
     {
-      "id": "user-qij84a011",
-      "email": "aryan@gmail.com",
-      "name": "Aryan Bisen",
-      "phone": "1111",
-      "avatarUrl": "https://api.dicebear.com/7.x/adventurer/svg?seed=Aryan%20Bisen",
-      "isAdmin": false,
-      "registeredAt": "2026-06-22T14:20:27.459Z"
-    },
-    {
       "id": "user-admin",
       "email": "admin@autohaus.de",
       "name": "Admin Administrator",
       "phone": "+49 170 11122233",
       "avatarUrl": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150",
       "isAdmin": true,
-      "registeredAt": "2026-06-10T10:00:00Z"
+      "registeredAt": "2026-06-10T10:00:00Z",
+      "token": "token-admin"
     },
     {
       "id": "user-seller1",
@@ -25,7 +17,8 @@
       "phone": "+49 171 9876543",
       "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=150",
       "isAdmin": false,
-      "registeredAt": "2026-06-11T12:00:00Z"
+      "registeredAt": "2026-06-11T12:00:00Z",
+      "token": "4eceb44128f9b0d6d3501761b5d680aaf6bc74e54431480fba87a67e8146ffdc"
     },
     {
       "id": "user-seller2",
@@ -34,31 +27,11 @@
       "phone": "+49 172 4455667",
       "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150",
       "isAdmin": false,
-      "registeredAt": "2026-06-12T14:30:00Z"
+      "registeredAt": "2026-06-12T14:30:00Z",
+      "token": "token-buyer"
     }
   ],
   "listings": [
-    {
-      "id": "listing-wu75v384x",
-      "sellerId": "user-qij84a011",
-      "sellerName": "Aryan Bisen",
-      "sellerPhone": "1111",
-      "sellerLocation": "Zürich",
-      "brand": "Porsche",
-      "model": "911 Turbo S",
-      "mileage": 50000,
-      "year": 2015,
-      "fuelType": "Benzin",
-      "transmission": "Automatik",
-      "price": 20000,
-      "description": "Top Zustand.",
-      "images": [
-        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800"
-      ],
-      "isApproved": false,
-      "status": "active",
-      "createdAt": "2026-06-22T14:24:44.247Z"
-    },
     {
       "id": "listing-1",
       "sellerId": "user-seller1",
@@ -184,7 +157,7 @@
       "lastMessageText": "Hallo Max, ist der Preis noch leicht verhandelbar?",
       "lastMessageTime": "2026-06-15T07:00:00Z",
       "unreadCount": {
-        "user-seller1": 0,
+        "user-seller1": 1,
         "user-seller2": 0
       }
     }
@@ -197,8 +170,13 @@
       "receiverId": "user-seller1",
       "content": "Hallo Max, ist der Preis noch leicht verhandelbar?",
       "createdAt": "2026-06-15T07:00:00Z",
-      "isRead": true
+      "isRead": false
     }
   ],
-  "favorites": {}
+  "favorites": {
+    "user-seller2": [
+      "listing-1",
+      "listing-2"
+    ]
+  }
 }

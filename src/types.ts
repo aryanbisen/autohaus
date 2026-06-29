@@ -6,6 +6,7 @@ export interface User {
   avatarUrl?: string;
   isAdmin?: boolean;
   registeredAt: string;
+  token?: string;
 }
 
 export interface Listing {
