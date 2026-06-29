@@ -1,6 +1,6 @@
 # 1 Schutzziele (CIA)
 
-![CIA-Ablauf](CIA.svg)
+![CIA-Ablauf](https://github.com/aryanbisen/autohaus/CIA.svg)
 
 Dieses Dokument beschreibt die implementierten Sicherheitsmaßnahmen gemäß der CIA-Triade (Confidentiality, Integrity, Availability) in der Autohaus-Plattform.
 
@@ -82,18 +82,68 @@ if (chat.buyerId !== req.user.id && chat.sellerId !== req.user.id && !req.user.i
 
 ---
 
+## 2. Integrity (Integrität)
 
-### Integritätsschutz 
+### Was wurde implementiert?
 
-- Absicherung von PUT /api/listings/:id und DELETE /api/listings/:id (Änderungen/Löschen nur durch den Eigentümer oder Admins gestattet).
-- Absicherung von PATCH /api/listings/:id/status (nur für den Eigentümer).
-- Absicherung der Admin-Endpunkte /api/admin/* durch requireAdmin Middleware (Zugriff verwehrt für normale User).
+**Eigentümer- und Rollenbasierte Zugriffskontrolle** – Sicherstellung, dass Fahrzeugdaten nur von autorisierten Personen manipuliert werden können.
+
+#### a) Eigentümerprüfung bei Inserat-Bearbeitung
+Jeder schreibende Zugriff auf Inserate (`PUT`, `DELETE`, `PATCH /status`) prüft, ob der anfragende Benutzer der Eigentümer ist oder Admin-Rechte besitzt:
+
+```typescript
+// server.ts – PUT /api/listings/:id 
+const listing = db.listings[index];
+if (listing.sellerId !== req.user.id && !req.user.isAdmin) {
+  return res.status(403).json({
+    error: "Zugriff verweigert. Sie können nur Ihre eigenen Inserate bearbeiten."
+  });
+}
+```
+
+Dieselbe Prüfung gilt für:
+- `DELETE /api/listings/:id` – Löschen von Inseraten
+- `PATCH /api/listings/:id/status` – Statusänderung (aktiv/verkauft/inaktiv)
+- `POST /api/listings` – Inserat erstellen (Seller-ID muss mit Login übereinstimmen)
+
+**Warum nützlich?** Ohne diese Prüfung könnte ein Angreifer eine HTTP-Anfrage direkt an den Server senden und z.B. den Kilometerstand eines fremden Fahrzeugs von 150.000 km auf 50.000 km reduzieren oder den Preis manipulieren. Die Integritätsprüfung verhindert das.
+
+#### b) Admin-Rollentrennung
+Die `requireAdmin`-Middleware schützt alle administrativen Endpunkte:
+
+```typescript
+// server.ts – requireAdmin Middleware
+function requireAdmin(req, res, next) {
+  if (!req.user || !req.user.isAdmin) {
+    return res.status(403).json({
+      error: "Zugriff verweigert. Administratorrechte erforderlich."
+    });
+  }
+  next();
+}
+```
+
+Angewendet auf:
+- `GET /api/admin/users` – Benutzerliste
+- `POST /api/admin/listings/:id/approve` – Inserat-Freigabe
+- `GET /api/admin/stats` – Dashboard-Statistiken
+
+**Warum nützlich?** Vorher konnte jeder Browser-Benutzer die Admin-API direkt aufrufen und z.B. Inserate freigeben oder alle Nutzerdaten einsehen. Jetzt wird serverseitig geprüft, ob der Token einem Admin gehört (**Privilege Escalation Prevention**).
+
+#### c) Profil-Selbstschutz (IDOR-Prüfung)
+```typescript
+// server.ts – PUT /api/auth/profile
+if (req.user.id !== userId) {
+  return res.status(403).json({ error: "Sie können nur Ihr eigenes Profil bearbeiten." });
+}
+```
+
+---
+
 
 ### Verfügbarkeitsschutz 
 
 - Implementierung eines IP-basierten, in-memory Rate Limiters zur DoS-Prävention.
 - Begrenzung von Login/Registrierungsversuchen auf max. 15 Anfragen pro Minute je IP-Adresse zur Verhinderung von Brute-Force-Angriffen.
 - Begrenzung aller anderen API-Schnittstellen auf max. 200 Anfragen pro Minute je IP-Adresse.
-
-## 2. Identitätsmanagement & Zugriffskontrolle
 
